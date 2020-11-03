@@ -1,0 +1,49 @@
+real VALVE_THRESHOLD = 10.0; ! start heating only if one valve is opened more than this value
+real CONST_INSIDE_TEMP = 22.0; ! desired inside temperature for heating function
+real CONST_OFFSET = 0.0; ! offset for heating function: increase heating supply temp in general
+real CONST_VALVE_OFFSET = 5.0; ! valve state dependet offset for heating function: decrease heating supply temp depending on valve state
+real CONST_GAIN = 1.9; ! gain for heating function: tilt heating supply temp in general
+real CONST_VALVE_GAIN = 1.1; ! valve state dependent gain for heating function: decrease heating supply temp depending on valve state. CONST_VALVE_GAIN < CONST_GAIN !!!
+
+var maxValveState = 0.0;
+var sysFunc_heating = dom.GetObject("funcHeating");
+string itemId;
+foreach(itemId, sysFunc_heating.EnumUsedIDs())
+{
+  var item = dom.GetObject(itemId);
+  if (item.IsTypeOf(OT_CHANNEL))
+  {
+    var device = dom.GetObject(item.Device());
+    if (device.IsTypeOf("HM-CC-RT-DN"))
+    {
+      string channelId;
+      foreach(channelId, device.Channels().EnumUsedIDs())
+      {
+        var channel = dom.GetObject(channelId);
+        if (channel.HssType() == "CLIMATECONTROL_RT_TRANSCEIVER")
+        {
+          WriteLine(device.Name() + ": Valve=" + channel.DPByHssDP("VALVE_STATE").Value());
+          maxValveState = maxValveState.Max(channel.DPByHssDP("VALVE_STATE").Value());
+        }
+      }
+    }
+  } 
+}
+WriteLine("maxValveState=" + maxValveState);
+
+if (maxValveState > VALVE_THRESHOLD)
+{
+  var sysVar_outsideTemp  = dom.GetObject("OutsideTemp");
+  WriteLine("outsideTemp=" + sysVar_outsideTemp.Value());
+
+  ! t(x,k) = INSIDE_TEMP + NIVEAU − VALVE_NIVEAU∙(1−k) − (NEIGUNG−(VALVE_NEIGUNG∙(1−k)/NEIGUNG)) ∙ (x − INSIDE_TEMP) ∙ (1.4347 + 0.021 ∙ (x − INSIDE_TEMP) + 247.9 ∙ 10^−6 ∙ (x−INSIDE_TEMP)^2)
+  real heatingSupplyTemp = CONST_INSIDE_TEMP + CONST_OFFSET - (CONST_GAIN - CONST_VALVE_GAIN*(1.0-maxValveState/100.0)/CONST_GAIN) * (sysVar_outsideTemp.Value() - CONST_INSIDE_TEMP) * (1.4347 + 0.021 * (sysVar_outsideTemp.Value() - CONST_INSIDE_TEMP) + 0.0002479 * (sysVar_outsideTemp.Value()-CONST_INSIDE_TEMP).Pow(2));
+  heatingSupplyTemp = heatingSupplyTemp - CONST_VALVE_OFFSET*(1.0-maxValveState/100.0);
+
+  dom.GetObject("HeatingSupplyTemp").State(heatingSupplyTemp);
+}
+else
+{
+  dom.GetObject("HeatingSupplyTemp").State(0.0);
+}
+WriteLine("heatingSupplyTemp=" + dom.GetObject("HeatingSupplyTemp").Value());

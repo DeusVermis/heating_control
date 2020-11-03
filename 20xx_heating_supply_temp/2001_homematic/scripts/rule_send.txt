@@ -1,0 +1,13 @@
+real CONST_HIGH = 100.0;  ! Value for 90°C heating supply temperature
+real CONST_LOW = 87.0;  ! Value for 40°C  heating supply temperature
+real CONST_OFF = 0.0;  ! Value to switch heating supply CONST_OFF
+if (dom.GetObject("HeatingSupplyTemp").Value() > 0)
+{
+  ! Function: f(x) = (CONST_HIGH%u2212CONST_LOW)%u2219x/50 + 90%u2219CONST_LOW/50 %u2212 40%u2219CONST_HIGH/50
+  WriteLine("wget -O - 'http://192.168.1.122/cm?user=admin&password=ABC123&cmnd=Dimmer%20" # (((CONST_HIGH - CONST_LOW) * (dom.GetObject("HeatingSupplyTemp").Value() / 50.0)) + (90.0*CONST_LOW/50.0) - (40.0*CONST_HIGH/50.0)) # "'");
+  dom.GetObject("CUxD.CUX2801001:1.CMD_EXEC").State("wget -O - 'http://192.168.1.122/cm?user=admin&password=ABC123&cmnd=Dimmer%20" # (((CONST_HIGH - CONST_LOW) * (dom.GetObject("HeatingSupplyTemp").Value() / 50.0)) + (90.0*CONST_LOW/50.0) - (40.0*CONST_HIGH/50.0)) # "'")
+} else
+{
+  WriteLine("wget -O - '192.168.1.122/cm?user=admin&password=ABC123&cmnd=Dimmer%20" # CONST_OFF # "'");
+  dom.GetObject("CUxD.CUX2801001:1.CMD_EXEC").State("wget -O - 'http://192.168.1.122/cm?user=admin&password=ABC123&cmnd=Dimmer%20" # CONST_OFF # "'");
+}

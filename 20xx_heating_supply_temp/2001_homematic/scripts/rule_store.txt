@@ -1,0 +1,1 @@
+dom.GetObject("HeatingControlError").State(dom.GetObject("CUxD.CUX2801001:1.CMD_RETS").Value())
