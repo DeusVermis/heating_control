@@ -27,3 +27,7 @@ The workflow is separated in the following modules with the objective to be exte
 * [10xx - Weather](10xx_weather/README.md): Getting and updating outside temperature.
 * [20xx - Heating Supply Temperature](20xx_heating_supply_temp/README.md): Calculating and updating heating supply temperature.
 * [30xx - Hardware Module](30xx_hardware_module/README.md): Controlling the central-heating boiler with a hardware module.
+
+## Disclaimer
+
+Use at your own risk. The contributors of this project cannot be made liable for any harm or damage that is caused by use or reproduction.
