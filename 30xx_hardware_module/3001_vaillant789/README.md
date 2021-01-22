@@ -131,5 +131,5 @@ Try the following values:
 # Known bugs
 
 * Behavior: When switching the central-heating on, the capacitators have to be filled and the µC cannot start.  
-  Workaround: Switch the central-heating on, wait for twenty seconds, witch it off and on again. Now the µC should start up properly and connect to WLAN.
+  Workaround: Switch the central-heating on, wait for twenty seconds, switch it off and on again. Now the µC should start up properly and connect to WLAN.
 * Behavior: The central-heating only starts heating up with values above ~80, which reduces the resolution to control the heating supply temperature to less than 20 steps.
